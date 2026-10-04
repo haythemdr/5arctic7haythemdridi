@@ -35,6 +35,7 @@ pipeline {
                     until docker exec sonar-test-mysql \
                       mysqladmin ping -h localhost -proot --silent
                     do
+                        echo "MySQL is not ready yet..."
                         sleep 5
                     done
 
@@ -53,7 +54,10 @@ pipeline {
 
             post {
                 always {
-                    sh 'docker rm -f sonar-test-mysql 2>/dev/null || true'
+                    sh '''
+                        echo "Removing temporary MySQL test container..."
+                        docker rm -f sonar-test-mysql 2>/dev/null || true
+                    '''
                 }
             }
         }
@@ -63,7 +67,7 @@ pipeline {
                 dir('backend') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                            mvn sonar:sonar \
+                            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                               -Dsonar.projectKey=devops-app-gestion-projets \
                               -Dsonar.projectName=DevOps-AppGestionDesProjets
                         '''
@@ -100,7 +104,9 @@ pipeline {
         }
 
         always {
-            sh 'docker rm -f sonar-test-mysql 2>/dev/null || true'
+            sh '''
+                docker rm -f sonar-test-mysql 2>/dev/null || true
+            '''
         }
     }
 }
