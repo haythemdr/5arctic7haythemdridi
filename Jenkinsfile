@@ -87,6 +87,33 @@ pipeline {
             }
         }
 
+        stage('Push Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        set -eu
+
+                        IMAGE="$DOCKER_USER/haythemdridi_5arctic7_gestionprojet:latest"
+
+                        docker tag devops-backend:latest "$IMAGE"
+
+                        echo "$DOCKER_TOKEN" | docker login \
+                            -u "$DOCKER_USER" \
+                            --password-stdin
+
+                        docker push "$IMAGE"
+                        docker logout
+                    '''
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 sh '''
