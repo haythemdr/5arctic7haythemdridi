@@ -117,11 +117,11 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "Stopping previous application stack..."
-                    docker compose down || true
+                    echo "Deploying application stack..."
+                    docker compose up -d --no-build
 
-                    echo "Starting application stack..."
-                    docker compose up -d
+                    echo "Checking deployed services..."
+                    docker compose ps
                 '''
             }
         }
